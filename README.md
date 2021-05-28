@@ -1,25 +1,26 @@
-<h1>Primeiro projeto em C#</h1>
+##Primeiro projeto em C#
 
-<h2>Criando uma API usando ASP.NET Core e Entity Framework Core</h2>
+#Criando uma API usando ASP.NET Core e Entity Framework Core
 
 
 
-<h5> 	Durante uma das fases do VAIVOA, um projeto de aceleração da carreira de Desenvolvedores Backend e Cientistas de Dados, recebemos o desafio de desenvolver uma API REST  com com .Net Core e Entity Framework Core que retorna 2 endpoints, Um receberá o email da pessoa e retornará um objeto de resposta com o número do cartão de crédito. E o outro endpoint deverá listar, em ordem de criação, todos os cartões de crédito virtuais de um solicitante (passando seu email como parâmetro), um desafio enorma para aqueles que como eu, estão migrando de uma outra tecnologia.
-</h5>
+Durante uma das fases do VAIVOA, um projeto de aceleração da carreira de Desenvolvedores Backend e Cientistas de Dados, recebemos o desafio de desenvolver uma API REST  com com .Net Core e Entity Framework Core que retorna 2 endpoints, Um receberá o email da pessoa e retornará um objeto de resposta com o número do cartão de crédito. E o outro endpoint deverá listar, em ordem de criação, todos os cartões de crédito virtuais de um solicitante (passando seu email como parâmetro), um desafio enorma para aqueles que como eu, estão migrando de uma outra tecnologia.
 
-<h5>Para a criação da API, tive que me aprofundar o máximo possível na linguagem C# para distinguir a sintaxe e aprender o necessário para utilizar o Framework então vamos para o resultado de 3 dias de imersão!
+Para a criação da API, tive que me aprofundar o máximo possível na linguagem C# para distinguir a sintaxe e aprender o necessário para utilizar o Framework então vamos para o resultado de 3 dias de imersão!
     
-</h5>
 
-<h3> Processo de criação da API
+#Processo de criação da API
     
-</h3>
 
-<h5>Desenvolvi o projeto utilizamos o Visual Studio 2019. Para começar, criei um projeto utilizando o template ASP.NET Core Web App sem configurações para HTTP :
+Desenvolvi o projeto utilizamos o Visual Studio 2019. Para começar, criei um projeto utilizando o template ASP.NET Core Web App sem configurações para HTTP :
 
 ![image-20210528145604137](C:\Users\Pichau\AppData\Roaming\Typora\typora-user-images\image-20210528145604137.png)
 
-<h5>Uma vez com o projeto criado, criei a classe Cliente com as propriedades e-mail e uma lista de Cartões e a classe Cartao com as propriedades numero do cartão e cliente, ambas as classe com um ID. O Entity que realiza o ORM(Mapeamento Objeto Relacional), automaticamente reconhece as props Id como Chave Primária quando criado o banco de dados.
+Uma vez com o projeto criado, criei a classe Cliente com as propriedades e-mail e uma lista de Cartões e a classe Cartao com as propriedades numero do cartão e cliente, ambas as classe com um ID. O Entity que realiza o ORM(Mapeamento Objeto Relacional), automaticamente reconhece as props Id como Chave Primária quando criado o banco de dados.
+
+
+
+
 
 namespace Project.Domain
 {
@@ -31,7 +32,9 @@ namespace Project.Domain
     }
 }
 
-<h3>________________________
+________________________
+
+
 
 namespace Project.Domain
 {
@@ -47,7 +50,11 @@ namespace Project.Domain
 
 
 
-<h5>Após criadas as classes, criei uma classe, por convensão chamada ClienteContext herdando a classe DbContext para servir como repositório onde colocamos nos DbSet as classes que seriam mapeadas pelo Entity:
+Após criadas as classes, criei uma classe, por convensão chamada ClienteContext herdando a classe DbContext para servir como repositório onde colocamos nos DbSet as classes que seriam mapeadas pelo Entity:
+
+
+
+
 
 namespace Project.Repo
 {
@@ -61,9 +68,13 @@ namespace Project.Repo
     }
 }
 
-<h5> Após criada a classe Context, precisamos configurar o projeto para trabalhar com um banco de dados, neste caso, usei o Sql Server para criar a tabela. Para configurar o banco de dados, precisamos passar uma String de Conexão para o arquivo appsettings.json e depois criar uma referência na classe Startup.cs, que é a classe onde fazemos as injeções de dependência, essa String de conexão vem com as configurações do seu banco de dados local, no meu caso ficou assim:</h5>
+ Após criada a classe Context, precisamos configurar o projeto para trabalhar com um banco de dados, neste caso, usei o Sql Server para criar a tabela. Para configurar o banco de dados, precisamos passar uma String de Conexão para o arquivo appsettings.json e depois criar uma referência na classe Startup.cs, que é a classe onde fazemos as injeções de dependência, essa String de conexão vem com as configurações do seu banco de dados local, no meu caso ficou assim:
 
-  "ConnectionStrings": {
+ 
+
+
+
+ "ConnectionStrings": {
     "defaltConnection": "Password=postcore1324;Persist Security Info=True;User ID=sa;Initial Catalog=Project;Data Source=DESKTOP-TIGCP3C"
 
 <h3>________________________
@@ -87,15 +98,14 @@ namespace Project.Repo
     
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
-<h5>Depois de feitas as configurações, podemos criar uma Migration com o comando Add-Migration no Package Manager Console, o comando cria uma classe com o script da criação do banco de dados. Depois é só usar o comando Update-Database para que o seu banco de dados seja criado no seu Servidor já com todas as tabelas e relações criadas pelo Entity.
+Depois de feitas as configurações, podemos criar uma Migration com o comando Add-Migration no Package Manager Console, o comando cria uma classe com o script da criação do banco de dados. Depois é só usar o comando Update-Database para que o seu banco de dados seja criado no seu Servidor já com todas as tabelas e relações criadas pelo Entity.
 
 ![image-20210528152934961](C:\Users\Pichau\AppData\Roaming\Typora\typora-user-images\image-20210528152934961.png)
 
 
 
-<h5>Uma vez criado o banco de dados, podemos criar os Controllers para fazer as requisições HTTP. Na Pasta Controllers, criamos uma nova classe controller chamada ClienteController para configurar as Rotas e criar as requisições com a seguinte configuração:
+Uma vez criado o banco de dados, podemos criar os Controllers para fazer as requisições HTTP. Na Pasta Controllers, criamos uma nova classe controller chamada ClienteController para configurar as Rotas e criar as requisições com a seguinte configuração:
     
-</h5>
 
 namespace Project.WebAPI.Controllers
 {
@@ -111,8 +121,8 @@ namespace Project.WebAPI.Controllers
 
 
 
-<h5>Em seguida, criamos as requisições para receber como parâmetro um e-mail e retornar um número de cartão de crédito aleatório que fica registrado no e-mail da requisição. Utilizei a classe Random do C# para gerar 4 instancias de números aleatórios, depois converti em uma String para concatena-los e salvar o número do cartão em um objeto do tipo Cartao, depois salvar este objeto na lista de cartões do Cliente da requisição e retornar o objeto com o número gerado. A requisição e o retorno ficaram da seguinte forma:
-</h5>
+Em seguida, criamos as requisições para receber como parâmetro um e-mail e retornar um número de cartão de crédito aleatório que fica registrado no e-mail da requisição. Utilizei a classe Random do C# para gerar 4 instancias de números aleatórios, depois converti em uma String para concatena-los e salvar o número do cartão em um objeto do tipo Cartao, depois salvar este objeto na lista de cartões do Cliente da requisição e retornar o objeto com o número gerado. A requisição e o retorno ficaram da seguinte forma:
+
 ![image-20210528154830893](C:\Users\Pichau\AppData\Roaming\Typora\typora-user-images\image-20210528154830893.png)
 
 
@@ -127,8 +137,8 @@ namespace Project.WebAPI.Controllers
 
 
 
-<h5>Depois fiz a requisição para passar como parâmetro o e-mail e receber a lista de cartões já gerados para aquele e-mail em ordem de criação, do mais antigo para o mais recente. A Requisição e a resposta ficaram da seguinte forma:  
-</h5>
+Depois fiz a requisição para passar como parâmetro o e-mail e receber a lista de cartões já gerados para aquele e-mail em ordem de criação, do mais antigo para o mais recente. A Requisição e a resposta ficaram da seguinte forma:  
+
 ![image-20210528155425711](C:\Users\Pichau\AppData\Roaming\Typora\typora-user-images\image-20210528155425711.png)
 
 
@@ -139,4 +149,4 @@ namespace Project.WebAPI.Controllers
 
 
 
-<h4>E assim finalizei meu desafio técnico da melhor forma que consegui. Poderiam ter sido usados classes DTO ao invés das entidades mapeadas, criar classes Services para criar as requisições e requisições mais bem estruturadas, porém devido ao prazo disponível para aprender a linguagem e os Frameworks não foi possível estruturar a API da forma que eu queria, mas entrego este desafio com a consciência tranquila e com a certeza que como sempre, dei meu melhor.
+E assim finalizei meu desafio técnico da melhor forma que consegui. Poderiam ter sido usados classes DTO ao invés das entidades mapeadas, criar classes Services para criar as requisições e requisições mais bem estruturadas, porém devido ao prazo disponível para aprender a linguagem e os Frameworks não foi possível estruturar a API da forma que eu queria, mas entrego este desafio com a consciência tranquila e com a certeza que como sempre, dei meu melhor.
