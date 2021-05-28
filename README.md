@@ -1,6 +1,7 @@
-## Primeiro projeto em C#
+# Primeiro projeto em C#
 
-# Criando uma API usando ASP.NET Core e Entity Framework Core
+
+## Criando uma API usando ASP.NET Core e Entity Framework Core
 
 
 
@@ -9,7 +10,7 @@ Durante uma das fases do VAIVOA, um projeto de aceleração da carreira de Desen
 Para a criação da API, tive que me aprofundar o máximo possível na linguagem C# para distinguir a sintaxe e aprender o necessário para utilizar o Framework então vamos para o resultado de 3 dias de imersão!
     
 
-# Processo de criação da API
+## Processo de criação da API
     
 
 Desenvolvi o projeto utilizamos o Visual Studio 2019. Para começar, criei um projeto utilizando o template ASP.NET Core Web App sem configurações para HTTP :
