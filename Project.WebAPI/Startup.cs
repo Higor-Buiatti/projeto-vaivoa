@@ -25,7 +25,11 @@ namespace Project.WebAPI
                 options.UseSqlServer(Configuration.GetConnectionString("DefaltConnection"));
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddScoped<IProjectRepository, ProjectRepository>();
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(option => option.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+                ;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

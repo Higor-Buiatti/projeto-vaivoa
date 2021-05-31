@@ -9,6 +9,6 @@ namespace Project.Domain
     {
         public int Id { get; set; }
         public string Email { get; set; }
-        public List<Cartao> Cartoes { get; set; }
+        public List<Cartao> Cartoes { get; set; } 
     }
 }
