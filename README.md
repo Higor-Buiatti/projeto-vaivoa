@@ -154,3 +154,222 @@ Depois fiz a requisição para passar como parâmetro o e-mail e receber a lista
 
 
 E assim finalizei meu desafio técnico da melhor forma que consegui. Poderiam ter sido usados classes DTO ao invés das entidades mapeadas, criar classes Services para criar as requisições e requisições mais bem estruturadas, porém devido ao prazo disponível para aprender a linguagem e os Frameworks não foi possível estruturar a API da forma que eu queria, mas entrego este desafio com a consciência tranquila e com a certeza que como sempre, dei meu melhor.
+Meus agradecimentos ao VAIVOA pela oportunidade.
+
+
+_________________________________
+
+
+# Atualização
+
+Mesmo que já não seja levado em conta este commit por ter sido realizado fora da data de entrega do desafio, decidi melhorar algumas partes do código que a principio não deram resultado satisfatório.
+Para começar criei a interface IProjectRepository e a classe ProjectRepository para fazer as Querys:
+
+```C#
+namespace Project.Repo
+{
+    public interface IProjectRepository
+    {
+        //Metodo Genérico que recebe qualquer Tipo como parametro.
+        void Add<T>(T entity) where T : class;
+        void Update<T>(T entity) where T : class;
+        void Delete<T>(T entity) where T : class;
+
+        Task<bool> SaveChangeAsync();
+
+
+        Task<Cliente[]> GetAllClientes();
+        Task<Cliente> GetClientesById(int id);
+        Task<Cliente[]> GetClientesByNome(string nome);
+        Task<Cliente> GetClienteByEmail(string email);
+
+
+    }
+}
+
+```
+
+____________________
+
+```C#
+namespace Project.Repo
+{
+    public class ProjectRepository : IProjectRepository
+    {
+        private readonly ClienteContext _context;
+
+        public ProjectRepository(ClienteContext context) // cria uma referência do Context.
+        {
+            _context = context;
+        }
+
+
+        public void Add<T>(T entity) where T : class
+        {
+            _context.Add(entity);
+        }
+
+        public void Delete<T>(T entity) where T : class
+        {
+            _context.Remove(entity);
+        }
+
+        public void Update<T>(T entity) where T : class
+        {
+            _context.Update(entity);
+        }
+
+        public async Task<bool> SaveChangeAsync()
+        {
+            return (await _context.SaveChangesAsync()) > 0;
+        }
+
+
+
+
+
+        public async Task<Cliente[]> GetAllClientes()
+        {
+            IQueryable<Cliente> query = _context.Clientes
+                .Include(c => c.Cartoes);
+
+            query = query.AsNoTracking().OrderBy(c => c.Id);
+
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<Cliente> GetClientesById(int id)
+        {
+            IQueryable<Cliente> query = _context.Clientes
+                .Include(c => c.Cartoes);
+
+            query = query.AsNoTracking().OrderBy(c => c.Id);
+
+            return await query.FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Cliente[]> GetClientesByNome(string nome)
+        {
+            IQueryable<Cliente> query = _context.Clientes
+                .Include(c => c.Cartoes);
+
+            query = query.AsNoTracking().OrderBy(c => c.Email.Contains(nome));
+
+            return await query.ToArrayAsync();
+        }
+
+
+        public async Task<Cliente> GetClienteByEmail(string email)
+        {
+            IQueryable<Cliente> query = _context.Clientes
+                .Include(c => c.Cartoes);
+
+            query = query.AsNoTracking().OrderBy(c => c.Email.Equals(email));
+
+            return await query.FirstOrDefaultAsync(c => c.Email == email);
+
+        }
+    }
+}
+```
+Em seguida adicionei ao escopo do Context na classe Startup.
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<ClienteContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaltConnection"));
+            });
+
+            services.AddScoped<IProjectRepository, ProjectRepository>();
+```
+Depois na classe ClienteController realizei as seguintes requisições, desta vez retornando corretamente seus JSONs no Postman.
+
+## Para retornar a lista de cartões referente a um e-mail:
+```C#
+[HttpGet("email/{email}")]
+        public async Task<IActionResult> GetEmailCards(string email)
+        {
+            try
+            {
+                var clientes = await _repo.GetClienteByEmail(email);
+
+                return Ok(clientes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro: {ex}");
+            }
+
+
+        }
+```
+![image](https://github.com/Higor-Buiatti/projeto-vaivoa/blob/master/assets/PostmanClienteGet.png)
+
+## Para criar um cartão aleatório e salva-lo no email da requisição:
+
+```C#
+[HttpGet("cartao/{email}")]
+        public async Task<IActionResult> GetCard(string email)
+        {
+            try
+            {
+                var cliente = await _repo.GetClienteByEmail(email);
+
+                if (cliente != null)
+                {
+                    var randomNumber = new Random();
+                    int numUm = randomNumber.Next(1000, 10000);
+                    int numDois = randomNumber.Next(1000, 10000);
+                    int numTres = randomNumber.Next(1000, 10000);
+                    int numQuatro = randomNumber.Next(1000, 10000);
+
+                    var rUm = Convert.ToString(numUm);
+                    var rDois = Convert.ToString(numDois);
+                    var rTres = Convert.ToString(numTres);
+                    var rQuatro = Convert.ToString(numQuatro);
+
+                    string result = rUm + " " + rDois + " " + rTres + " " + rQuatro;
+
+
+                    cliente.Cartoes = new List<Cartao>
+                                        {
+                                        new Cartao { NumeroDoCartao = result}
+                                        };
+
+
+
+                    _repo.Update(cliente);
+                    if (await _repo.SaveChangeAsync())
+                    {
+                        return Ok(cliente);
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest($"erro: {ex}");
+            }
+            return BadRequest("Não Criado");
+        }
+```
+![image](https://github.com/Higor-Buiatti/projeto-vaivoa/blob/master/assets/PostmanCriarCartao.png)
+
+Verifiquei que o Postman não estava recebendo a resposta devido também ao loop infinito criado quando uma entidade referenciava a outra sem parar. Ignorei o loop passando a seguinte configuração de Serializable na Classe Startup:
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+        {
+           //...(Context)
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(option => option.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+                ;
+        }
+```
+
+Assim consegui a resposta das requisições de forma correta.
